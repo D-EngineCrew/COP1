@@ -32,19 +32,22 @@ func _ready() -> void:
 	content.add_theme_constant_override("separation", 12)
 	content.custom_minimum_size = Vector2(520, 0)
 	center.add_child(content)
-	var title := Label.new()
-	title.text = "COP 1"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 84)
-	title.add_theme_color_override("font_color", Color(1, 1, 1))
-	title.add_theme_color_override("font_outline_color", RED)
-	title.add_theme_constant_override("outline_size", 14)
-	content.add_child(title)
-	var sub := Label.new()
-	sub.text = "City of Peru · Ciudad del Perú"
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_size_override("font_size", 22)
-	content.add_child(sub)
+	if ResourceLoader.exists("res://assets/logo.png"):
+		var logo := TextureRect.new()
+		logo.texture = load("res://assets/logo.png")
+		logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		logo.custom_minimum_size = Vector2(0, 230)
+		content.add_child(logo)
+	else:
+		var title := Label.new()
+		title.text = "COP 1"
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override("font_size", 84)
+		title.add_theme_color_override("font_color", Color(1, 1, 1))
+		title.add_theme_color_override("font_outline_color", RED)
+		title.add_theme_constant_override("outline_size", 14)
+		content.add_child(title)
 	_build_main()
 	_build_new()
 	_build_load()
@@ -194,7 +197,24 @@ func _start_new(i: int) -> void:
 	_start_world()
 
 
+const SCRIPTS := [
+	"res://scripts/world/lima.gd", "res://scripts/world/util.gd", "res://scripts/entities/humanoid.gd",
+	"res://scripts/entities/weapons.gd", "res://scripts/entities/vehicle.gd", "res://scripts/entities/player.gd",
+	"res://scripts/entities/npc.gd", "res://scripts/world/interactable.gd", "res://scripts/world/interiors.gd",
+	"res://scripts/world/landmarks.gd", "res://scripts/world/city_builder.gd", "res://scripts/ui/touch_controls.gd",
+	"res://scripts/ui/siren_icons.gd", "res://scripts/ui/minimap.gd", "res://scripts/ui/hud.gd", "res://scripts/world/world.gd",
+]
+
+
 func _start_world() -> void:
+	var bad: Array = []
+	for path in SCRIPTS:
+		var sc: Script = load(path)
+		if sc == null or not sc.can_instantiate():
+			bad.append(path.get_file())
+	if not bad.is_empty():
+		Game.dbg("Errores de compilación en: " + ", ".join(bad))
+		return
 	Game.in_game = true
 	get_tree().change_scene_to_file("res://scenes/world.tscn")
 

@@ -82,3 +82,36 @@ func broadcast_noise(pos: Vector3, radius: float, source: Node = null) -> void:
 	for n in get_tree().get_nodes_in_group("npc"):
 		if n.has_method("hear") and n.global_position.distance_to(pos) < radius:
 			n.hear(pos, source)
+
+
+# ---------- Depuración en pantalla ----------
+var _dbg_label: Label
+var _dbg_lines: Array = []
+
+
+func dbg(text: String, replace_last := false) -> void:
+	print(text)
+	if _dbg_label == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 100
+		add_child(layer)
+		_dbg_label = Label.new()
+		_dbg_label.position = Vector2(16, 16)
+		_dbg_label.add_theme_font_size_override("font_size", 22)
+		_dbg_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+		_dbg_label.add_theme_constant_override("outline_size", 6)
+		layer.add_child(_dbg_label)
+	if replace_last and not _dbg_lines.is_empty():
+		_dbg_lines[_dbg_lines.size() - 1] = text
+	else:
+		_dbg_lines.append(text)
+	while _dbg_lines.size() > 14:
+		_dbg_lines.pop_front()
+	_dbg_label.text = "\n".join(_dbg_lines)
+	_dbg_label.visible = true
+
+
+func dbg_hide(delay := 6.0) -> void:
+	await get_tree().create_timer(delay).timeout
+	if _dbg_label:
+		_dbg_label.visible = false

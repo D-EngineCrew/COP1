@@ -30,24 +30,32 @@ func _ready() -> void:
 	Game.in_game = true
 	Game.paused = false
 	get_tree().paused = false
+	Game.dbg("Cargando Lima...")
+	await get_tree().process_frame
 	_setup_environment()
+	Game.dbg("1/6 cielo y clima listos")
 	builder = CityBuilder.new()
 	add_child(builder)
 	builder.setup(self)
 	actors = Node3D.new()
 	add_child(actors)
+	Game.dbg("2/6 avenidas listas")
+	await get_tree().process_frame
 	var start := Game.get_vec3("pos")
 	Game.state["inside"] = ""
-	builder.preload_around(start)
+	await builder.preload_async(start)
+	Game.dbg("3/6 ciudad lista")
 	player = Player.new()
 	add_child(player)
 	player.global_position = start
 	player.yaw = float(Game.state.get("yaw", 0.0))
 	player.died.connect(_on_player_died)
+	Game.dbg("4/6 JeanSyo listo")
 	_spawn_player_car()
 	hud = Hud.new()
 	add_child(hud)
 	hud.setup(player, self)
+	Game.dbg("5/6 interfaz lista")
 	Weather.current = String(Game.state.get("weather", "nublado"))
 	Weather.bind(env, sun, rain)
 	Wanted.reset_from_state()
@@ -55,6 +63,12 @@ func _ready() -> void:
 	Wanted.level_changed.connect(_on_wanted_changed)
 	Game.arrested.connect(_on_arrested)
 	Game.notify("Bienvenido a COP 1, %s" % Game.state["name"])
+	Game.dbg("6/6 listo")
+	Game.dbg_hide(4.0)
+	get_tree().create_timer(2.0).timeout.connect(func():
+		if is_instance_valid(player):
+			Game.dbg("pos=%s chunks=%d fps=%d" % [str(player.global_position.snapped(Vector3.ONE)), builder.chunks.size(), Engine.get_frames_per_second()])
+			Game.dbg_hide(8.0))
 
 
 func _exit_tree() -> void:

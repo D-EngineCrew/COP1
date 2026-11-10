@@ -101,9 +101,9 @@ func has_chunk_at(p: Vector3) -> bool:
 	return chunks.has(Vector2i(floori(p.x / CS), floori(p.z / CS)))
 
 
-func update_around(pos: Vector3, burst := 1) -> void:
+func update_around(pos: Vector3, burst := 1, radius := -1) -> void:
 	var pc := Vector2i(floori(pos.x / CS), floori(pos.z / CS))
-	var r := Game.chunk_radius()
+	var r := Game.chunk_radius() if radius < 0 else radius
 	for dx in range(-r, r + 1):
 		for dz in range(-r, r + 1):
 			var k := Vector2i(pc.x + dx, pc.y + dz)
@@ -120,6 +120,26 @@ func update_around(pos: Vector3, burst := 1) -> void:
 			chunks.erase(k)
 	queue = queue.filter(func(k): return absi(k.x - pc.x) <= r + 1 and absi(k.y - pc.y) <= r + 1)
 	_update_landmarks(pos)
+
+
+func preload_async(pos: Vector3) -> void:
+	update_around(pos, 0, 1)
+	var total := queue.size()
+	var done := 0
+	while not queue.is_empty():
+		_build_chunk(queue.pop_front())
+		done += 1
+		Game.dbg("Construyendo calles %d/%d" % [done, total], done > 1)
+		await get_tree().process_frame
+	Game.dbg("Colocando lugares de Lima...")
+	for lm in lm_list:
+		var id: String = lm["id"]
+		var p := Lima.to_local(lm["lat"], lm["lon"])
+		if Vector2(p.x - pos.x, p.z - pos.z).length() < 260.0 + Landmarks.radius(lm["kind"]) and not lm_nodes.has(id):
+			var node := Landmarks.build(lm, world)
+			add_child(node)
+			lm_nodes[id] = node
+			await get_tree().process_frame
 
 
 func preload_around(pos: Vector3) -> void:

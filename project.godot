@@ -6,7 +6,7 @@ config/name="COP 1"
 config/description="Juego de mundo abierto ambientado en Lima, Perú"
 run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://icon.png"
 
 [autoload]
 Game="*res://scripts/autoload/game.gd"
