@@ -433,7 +433,7 @@ func _police_manager(pp: Vector3) -> void:
 	# los patrulleros llegan y bajan a los oficiales
 	for v in get_tree().get_nodes_in_group("vehicle"):
 		if v is Vehicle and v.has_meta("police_unit") and v.ai_mode == "chase" and not v.wreck:
-			var d := v.global_position.distance_to(pp)
+			var d: float = v.global_position.distance_to(pp)
 			if d < 18.0 and absf(v.speed) < 5.0:
 				v.ai_mode = "idle"
 				for _k in range(2):

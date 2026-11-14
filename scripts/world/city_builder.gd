@@ -292,7 +292,7 @@ func _add_runs(body: StaticBody3D, info: Dictionary, nx: int, nz: int, lx: float
 	for side in sides:
 		var run: Array = []
 		for k in range(side.size() + 1):
-			var valid := k < side.size() and info.has(side[k]) and info[side[k]]["ok"]
+			var valid: bool = k < side.size() and info.has(side[k]) and bool(info[side[k]]["ok"])
 			if valid:
 				run.append(side[k])
 			elif not run.is_empty():

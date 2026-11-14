@@ -101,7 +101,7 @@ func _get_touch() -> Node:
 
 
 func _kb_pressed(key: int) -> bool:
-	var now := Input.is_physical_key_pressed(key)
+	var now: bool = Input.is_physical_key_pressed(key as Key)
 	var was: bool = _kb_prev.get(key, false)
 	_kb_prev[key] = now
 	return now and not was
@@ -313,7 +313,7 @@ func _nearest_vehicle() -> Vehicle:
 	var bd := 4.2
 	for v in get_tree().get_nodes_in_group("vehicle"):
 		if v is Vehicle and not v.wreck and v.driver == null:
-			var d := v.global_position.distance_to(global_position)
+			var d: float = v.global_position.distance_to(global_position)
 			if d < bd:
 				bd = d
 				best = v
